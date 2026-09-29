@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProductController;
+
+route::resource('products', ProductController::class);
 
 Route::get('/', function () {
     return view('welcome');
@@ -14,5 +17,7 @@ Route::get('/login', function () {
 });
 
 Route::get('/admin', function () {
-    return view('admin');
+    $products = \App\Models\Product::all();
+
+    return view('admin', compact('products'));
 });

@@ -48,6 +48,14 @@
                     <span>Dashboard</span></a>
             </li>
 
+            <!-- Nav Item - Kelola Produk -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('products.index') }}">
+                    <i class="fas fa-fw fa-box"></i>
+                    <span>Kelola Produk</span></a>
+            </li>
+
+            
             <!-- Divider -->
             <hr class="sidebar-divider">
 
