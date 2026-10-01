@@ -19,3 +19,5 @@ Route::get('/admin', function () {
 });
 
 Route::resource('products', ProductController::class);
+
+route::get('/products', [ProductController::class, 'index']);
