@@ -2,16 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
-<<<<<<< HEAD
-=======
+use App\Http\Controllers\PostController;
 
-route::resource('products', ProductController::class);
->>>>>>> origin/main
+Route::resource('products', ProductController::class);
 
 Route::get('/', function () {
     return view('welcome');
 });
-use App\Http\Controllers\PostController;
 
 Route::get('/posts', [PostController::class, 'index']);
 
@@ -23,4 +20,10 @@ Route::get('/admin', function () {
     $products = \App\Models\Product::all();
 
     return view('admin', compact('products'));
+});
+
+Route::get('/kasir', function () {
+    $products = \App\Models\Product::all();
+
+    return view('kasir', compact('products'));
 });
