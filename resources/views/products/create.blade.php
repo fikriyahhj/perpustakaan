@@ -30,7 +30,9 @@
     </div>
 @endif
 
-            <form action="{{ route('products.store') }}" method="POST">
+            <form action="{{ route('products.store') }}"
+      method="POST"
+      enctype="multipart/form-data">
 
                 @csrf
 
@@ -64,6 +66,15 @@
                            name="stock"
                            class="form-control"
                            required>
+                </div>
+
+                <div class="form-group">
+                    <label>Gambar Produk</label>
+                    <input type="file"
+                            name="image"
+                            class="form-control"
+                            accept="image/jpeg,image/png,image/webp">
+                    <small class="text-muted">Format JPG, PNG, atau WEBP. Maksimal 2 MB.</small>
                 </div>
 
                 <button type="submit" class="btn btn-primary">

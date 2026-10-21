@@ -42,6 +42,7 @@
                             <th>No</th>
                             <th>Nama Produk</th>
                             <th>SKU</th>
+                            <th>IMAGE</th>
                             <th>Harga</th>
                             <th>Stok</th>
                             <th>Aksi</th>
@@ -58,6 +59,16 @@
                             <td>{{ $product->name }}</td>
 
                             <td>{{ $product->sku }}</td>
+
+                            <td>
+                                @if ($product->image)
+                                    <img src="{{ asset('storage/' . $product->image) }}"
+                                        alt="{{ $product->name }}"
+                                        width="80">
+                                @else
+                                    KOSONG
+                                @endif
+                            </td>
 
                             <td>
                                 Rp {{ number_format($product->price, 0, ',', '.') }}
