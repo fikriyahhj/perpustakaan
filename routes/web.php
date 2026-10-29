@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\InvoiceController;
+
 
 Route::resource('products', ProductController::class);
 
@@ -27,3 +29,6 @@ Route::get('/kasir', function () {
 
     return view('kasir', compact('products'));
 });
+
+Route::get('/invoice/pdf', [InvoiceController::class, 'generate'])
+    ->name('invoice.pdf');
