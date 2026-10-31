@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>Kasir</title>
 
     <link href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         body {
@@ -121,7 +123,7 @@
 
                 <div>
                     Kasir:
-                    <strong>Admin</strong>
+                    <strong>{{ auth()->user()->name }}</strong>
                 </div>
 
                 <div id="tanggal"></div>
@@ -923,170 +925,118 @@
     /* ================= BAYAR & CETAK ================= */
 
     document
-        .getElementById('btnBayar')
-        .addEventListener('click', function() {
+    .getElementById('btnBayar')
+    .addEventListener('click', async function() {
 
+        if (cart.length === 0) {
+            alert('Keranjang masih kosong.');
+            return;
+        }
 
-            if (cart.length === 0) {
+        let paymentMethod = document.getElementById('paymentMethod').value;
 
-                alert('Keranjang masih kosong.');
+        if (paymentMethod === '') {
+            alert('Silakan pilih metode pembayaran.');
+            return;
+        }
 
-                return;
+        let payment = parseInt(document.getElementById('payment').value) || 0;
 
+        let grandTotalText = document.getElementById('grandTotal').innerText;
+        let grandTotal = parseInt(grandTotalText.replace(/\D/g, '')) || 0;
+
+        if (payment < grandTotal) {
+            alert('Pembayaran masih kurang.');
+            return;
+        }
+
+        this.disabled = true;
+
+        try {
+            const response = await fetch("{{ route('orders.store') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    cart: cart.map(item => ({
+                        id: item.id,
+                        qty: item.qty
+                    })),
+                    customer: document.getElementById('customer').value,
+                    discount: document.getElementById('discountInput').value || 0,
+                    tax: document.getElementById('taxInput').value || 0,
+                    other_fee: document.getElementById('otherFeeInput').value || 0,
+                    payment: payment,
+                    payment_method: paymentMethod
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Transaksi gagal disimpan.');
             }
 
-
-            let paymentMethod =
-                document.getElementById('paymentMethod').value;
-
-
-            if (paymentMethod === '') {
-
-                alert('Silakan pilih metode pembayaran.');
-
-                return;
-
-            }
-
-
-            let payment =
-                parseInt(
-                    document.getElementById('payment').value
-                ) || 0;
-
-
-            let grandTotalText =
-                document.getElementById('grandTotal').innerText;
-
-
-            let grandTotal =
-                parseInt(
-                    grandTotalText.replace(/\D/g, '')
-                ) || 0;
-
-
-            if (payment < grandTotal) {
-
-                alert('Pembayaran masih kurang.');
-
-                return;
-
-            }
-
-
-            /* ================= ISI DATA STRUK ================= */
+            const order = result.order;
 
             document.getElementById('strukNoTransaksi').innerText =
-                document.getElementById('noTransaksi').innerText;
-
+                order.transaction_number;
 
             document.getElementById('strukTanggal').innerText =
-                document.getElementById('tanggal').innerText;
-
+                new Date(order.created_at).toLocaleDateString('id-ID');
 
             let strukItems = '';
 
-
             cart.forEach(function(item) {
-
-                let totalItem =
-                    item.price * item.qty;
-
+                let totalItem = item.price * item.qty;
 
                 strukItems += `
-
                     <p>
-
-                        ${item.name}
-                        x${item.qty}
-
+                        ${item.name} x${item.qty}
                         <br>
-
                         Rp ${totalItem.toLocaleString('id-ID')}
-
                     </p>
-
                 `;
-
             });
 
-
-            document.getElementById('strukItems').innerHTML =
-                strukItems;
-
-
-            let subtotal =
-                cart.reduce(function(total, item) {
-
-                    return total +
-                        (item.price * item.qty);
-
-                }, 0);
-
-
-            let discount =
-                parseInt(
-                    document.getElementById('discountInput').value
-                ) || 0;
-
-
-            let tax =
-                parseInt(
-                    document.getElementById('taxInput').value
-                ) || 0;
-
-
-            let otherFee =
-                parseInt(
-                    document.getElementById('otherFeeInput').value
-                ) || 0;
-
-
-            let change =
-                payment - grandTotal;
-
+            document.getElementById('strukItems').innerHTML = strukItems;
 
             document.getElementById('strukSubtotal').innerText =
-                'Rp ' +
-                subtotal.toLocaleString('id-ID');
-
+                'Rp ' + Number(order.subtotal).toLocaleString('id-ID');
 
             document.getElementById('strukDiscount').innerText =
-                'Rp ' +
-                discount.toLocaleString('id-ID');
-
+                'Rp ' + Number(order.discount).toLocaleString('id-ID');
 
             document.getElementById('strukTax').innerText =
-                'Rp ' +
-                tax.toLocaleString('id-ID');
-
+                'Rp ' + Number(order.tax).toLocaleString('id-ID');
 
             document.getElementById('strukOtherFee').innerText =
-                'Rp ' +
-                otherFee.toLocaleString('id-ID');
-
+                'Rp ' + Number(order.other_fee).toLocaleString('id-ID');
 
             document.getElementById('strukTotal').innerText =
-                'Rp ' +
-                grandTotal.toLocaleString('id-ID');
-
+                'Rp ' + Number(order.grand_total).toLocaleString('id-ID');
 
             document.getElementById('strukPayment').innerText =
-                'Rp ' +
-                payment.toLocaleString('id-ID');
-
+                'Rp ' + Number(order.payment).toLocaleString('id-ID');
 
             document.getElementById('strukChange').innerText =
-                'Rp ' +
-                change.toLocaleString('id-ID');
+                'Rp ' + Number(order.change).toLocaleString('id-ID');
 
-
-            alert('Pembayaran berhasil.');
-
+            alert('Pembayaran berhasil disimpan.');
 
             window.print();
 
-        });
+        } catch (error) {
+            alert(error.message);
+            console.error('Kesalahan pembayaran:', error);
+        } finally {
+            this.disabled = false;
+        }
+
+    });
 
 
 
@@ -1225,6 +1175,20 @@
 
         });
 
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const userId = "{{ auth()->id() }}"; 
+
+        console.log('Mendengarkan Private Channel: user.' + userId);
+
+        window.Echo.private('user.' + userId)
+            .listen('.OrderPlaced', (e) => {
+                console.log('NOTIFIKASI MASUK:', e);
+                alert('Transaksi Baru Berhasil: ' + e.order.transaction_number);
+            });
+    });
 </script>
 
 </body>

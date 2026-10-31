@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Login - fikriyah's page</title>
 
     <style>
@@ -98,18 +97,29 @@
     <div class="login-container">
 
         <h1>Selamat datang</h1>
-        <p>Silakan login untuk masuk ke halaman admin.</p>
+        <p>Silakan login untuk masuk ke aplikasi.</p>
 
-        <form action="/admin" method="GET">
+        <!-- Tambahkan ini di atas tag <form> -->
+@if ($errors->any())
+    <div style="color: red; background: #ffe6e6; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; text-align: center;">
+        {{ $errors->first() }}
+    </div>
+@endif
+
+<form action="{{ route('login.post') }}" method="POST">
+
+        <!-- UBAH BAGIAN FORM DI SINI -->
+        <form action="{{ route('login.post') }}" method="POST">
+            @csrf
 
             <div class="form-group">
-                <label>Username</label>
-                <input type="text" name="username" placeholder="Masukkan username">
+                <label>Email</label>
+                <input type="email" name="email" placeholder="Masukkan email" required>
             </div>
 
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" name="password" placeholder="Masukkan password">
+                <input type="password" name="password" placeholder="Masukkan password" required>
             </div>
 
             <button type="submit" class="login-btn">
